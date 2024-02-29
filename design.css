@@ -1,0 +1,38 @@
+#header-title{
+	background-color: rgba(179, 158, 123, 0.87);
+	font-style: italic;
+	text-align: center;
+	justify-content: center;
+	font-family:Verdana, Geneva, Tahoma, sans-serif;
+	padding: 5px;	
+	display: flex;
+}
+
+body{
+	background: peachpuff;
+}
+
+#playview-container{
+	display: grid;
+	grid-template-columns: auto auto auto auto; /*the number of additions signifies the grid*/
+	padding: 40px;
+	text-align: center;
+	justify-content: center;
+	/*prevents user selection*/
+	-webkit-user-select: none;
+	-ms-user-select:none;
+	user-select:none;
+}
+
+.playview-item{
+	background-color: rgba(255,255,255,0.8);
+	border: 1px solid rgba(0,0,0,0.8);
+	padding: 60px; /*specifies the size of each cell*/
+	font-size: 30px;
+	text-align: center;
+	justify-content: center;
+	width:50px;
+	height: 50px;
+	box-sizing: border-box;
+
+}
