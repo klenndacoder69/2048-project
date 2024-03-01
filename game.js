@@ -55,10 +55,68 @@ function onClickContainer(){
 }
 
 function handleDragMovement(){
-     /*
+    /*
     User may do an up, down, left, right stroke
     After the stroke (drag), number may or may not disappear
     */ 
+    /*
+    Clicking and dragging are two different things. Thus, we must consider a distance to
+    where a mouse 'drag' is actually a dragging scenario and not a clicking scenario.
+    */
+    var negX;
+    var negY;
+    const dragDistance = 6;
+    let xStart;
+    let yStart;
+
+    document.addEventListener('mousedown', function(event){
+        xStart = event.pageX; //pageX and pageY returns coordinates of mouse
+        yStart = event.pageY;
+   })
+    
+    document.addEventListener('mouseup', function(event){
+        const xDis = event.pageX - xStart;
+        const yDis = yStart - event.pageY;
+        if(Math.sign(xDis) === -1){
+            negX = true;
+        }
+        else{
+            negX = false;
+        }
+        if(Math.sign(yDis) === -1){
+            negY = true;
+        }
+        else{
+            negY = false;
+        }
+        const xDiff = Math.abs(xDis);
+        const yDiff = Math.abs(yDis);
+        console.log("x is: " + (event.pageX - xStart))
+        console.log("y is: " + (yStart - event.pageY))
+        /*
+           We consider the differences of x and y to consider on what direction
+           the user is dragging to.  
+        */
+        
+        if(!(xDiff < dragDistance && yDiff < dragDistance)){ //checks if the user drags
+            if(xDiff > yDiff){ //we consider the left and right drag
+                if(negX){
+                    console.log("negative x drag");
+                }
+                else{
+                    console.log("positive x drag");
+                }
+            }
+            else{ //we consider the up and down drag
+                if(negY){
+                    console.log("negative y drag");
+                }
+                else{
+                    console.log("positive y drag");
+                }
+            }
+        }
+    })
 
 }   
 
@@ -69,4 +127,5 @@ document.addEventListener('DOMContentLoaded', function (){ //when website starts
     updateGrid(randomizeNumbers(), 2); //sets 2nd number for starting grid
     document.getElementById("debug-purposes").innerHTML = randomizeNumbers();
     document.getElementById("playview-container").onclick = onClickContainer;
+    handleDragMovement();
 }); //keep note that I passed the function reference. using createGrid() will return an undefined since you already executed it before the DOM even loaded
