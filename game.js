@@ -1,12 +1,13 @@
 //global variables:
-var grid_elements = document.getElementsByClassName("playview-item");
-var grid_values = Array.from({length:16}, () => 0);  //grid value array, sets the length to 16
+const numGrid = 16; //number of grids
+var grid_elements = document.getElementsByClassName("playview-item"); //array that contains the elements of the grid that are changeable
+var grid_values = Array.from({length:numGrid}, () => 0);  //grid value array, sets the length to 16
 
 //end of global variables...
 function randomizeNumbers(){
     //random number will be picked through grid values that are equal to zero (open spaces)
     var open_slots = [];
-    for(var a = 0; a < grid_values.length; a++){
+    for(var a = 0; a < numGrid; a++){
         if(grid_values[a] == 0){
             //this suggests an open slot. push the index to the list
             open_slots.push(a);
@@ -20,22 +21,31 @@ function randomizeNumbers(){
 function createGrid(){
     const playviewContainer = document.getElementById('playview-container');
 
-    for(let i = 0; i < 16; i++){
+    for(let i = 0; i < numGrid; i++){
         const playviewItem = document.createElement('div');
         playviewItem.classList.add('playview-item');
         playviewContainer.appendChild(playviewItem);
     }
 }
 
-function updateGrid(index, value){
+function addNum(index, value){
    //check whether the cell has a value
     if(grid_values[index] == 0){
         grid_values[index] = value;
-        grid_elements[index].innerHTML = value;         
     }
   console.log(grid_values);
 }
 
+function updateGrid(){ //changed updateGrid based on position of grid_values
+    for(var a = 0; a < numGrid; a++){
+        if(grid_values[a] == 0){
+            grid_elements[a].innerHTML = "";
+        }
+        if(grid_values[a] != 0){
+            grid_elements[a].innerHTML = grid_values[a];
+        }
+    }
+}
 function random_values(){
     var values = [2,4];
     var randIndex = Math.floor(Math.random() * values.length);
@@ -46,26 +56,24 @@ function onClickContainer(){
     var index = randomizeNumbers();
     //or you can just create a list containing all the grid elements, and just change their values there.
     //get that specific grid element
-    var item = grid_elements[index];
     var value = random_values();
     //insertion of '4' will be implemented later
-    updateGrid(index, value);
+    addNum(index, value);
+    updateGrid()
     //we can keep track of the numbers by appending it to a list?
 
 }
 
 function handleDragMovement(){
     /*
-    User may do an up, down, left, right stroke
-    After the stroke (drag), number may or may not disappear
-    */ 
-    /*
+    User may do an up, down, left, right stroke. After the stroke (drag), number may or may not disappear
     Clicking and dragging are two different things. Thus, we must consider a distance to
-    where a mouse 'drag' is actually a dragging scenario and not a clicking scenario.
-    */
+    where a mouse 'drag' is actually a dragging scenario and not a clicking scenario. 
+    */ 
+     
     var negX;
     var negY;
-    const dragDistance = 6;
+    const dragDistance = 7; 
     let xStart;
     let yStart;
 
@@ -102,17 +110,22 @@ function handleDragMovement(){
             if(xDiff > yDiff){ //we consider the left and right drag
                 if(negX){
                     console.log("negative x drag");
+                    handleNumMovement(-1); //-1 : negative x
                 }
                 else{
                     console.log("positive x drag");
+                    handleNumMovement(1); // 1 : positive x
                 }
             }
             else{ //we consider the up and down drag
                 if(negY){
                     console.log("negative y drag");
+                    handleNumMovement(-2); //-2 : negative y
                 }
                 else{
                     console.log("positive y drag");
+                    handleNumMovement(2); //2 : positive y
+
                 }
             }
         }
@@ -120,12 +133,184 @@ function handleDragMovement(){
 
 }   
 
+function handleNumMovement(direction){ //function for handling number movement in any primary direction
+    var column_arrays;
+    var index_column;
+    if(direction == -1){ //neg x
+        for(var a = 0; a < numGrid; a += 4){
+            updateNegRow(a);
+        }
+    }
+    if(direction == 1){ //pos x
+        for(var a = 3; a < numGrid; a += 4){
+           updatePosRow(a);
+        }
+    }
+    if(direction == -2){ //neg y
+        for(var a = 0; a < numGrid/4; a++){
+            column_arrays = [];
+            index_column = [];
+            for(var b = a; b < numGrid; b+=4){
+                index_column.push(b); // push the indexes
+                column_arrays.push(grid_values[b]); //push the values
+            }
+            // updatePosRow(column_arrays.length - 1); //this means an index of 3 as the starting index
+            updateNegCol(column_arrays, index_column);
+        }
+    }
+    if(direction == 2){
+        for(var a = 0; a < numGrid/4; a++){
+            column_arrays = [];
+            index_column = [];
+            for(var b = a; b < numGrid; b+=4){
+                index_column.push(b);
+                column_arrays.push(grid_values[b]);
+            }
+            updatePosCol(column_arrays, index_column);
+        }
+    }
+    onClickContainer();
+}
 
+function checkOpen(){ //numbers will only combine if equal, if not equal, then collide only
+    //check if it is open, if not check the next
+
+}
+
+function updateColNumbers(column_arrays, index_column){
+    for(var a = 0; a < column_arrays.length; a++){
+        grid_values[index_column[a]] = column_arrays[a]; //updates the grid_values to be rendered later in updateGrid()
+    }
+}
+
+function updateNegCol(column_arrays, index_column){ //keep in mind this has the same implementation of updatePosRow with added tracking of its column array and indices
+    var startingIndex = column_arrays.length - 1;
+    var endIndex = startingIndex - 4;
+    var vacantIndex;
+    for(var index = startingIndex; index > endIndex; index--){
+        // vacantIndex = updatePosVacancy(startingIndex, endIndex) implementation must be changed 
+        vacantIndex = updatePosColVacancy(startingIndex, endIndex, column_arrays)
+        if(vacantIndex == -1){
+            break;
+        }
+        if(column_arrays[index] != 0 && index < vacantIndex){
+            column_arrays[vacantIndex] = column_arrays[index];
+            column_arrays[index] = 0;
+        }
+    }
+    updateColNumbers(column_arrays, index_column);
+}
+
+function updatePosCol(column_arrays, index_column){
+    var startingIndex = 0;
+    var endIndex = startingIndex + 4;
+    var vacantIndex;
+    for(var index = startingIndex; index < endIndex; index++){
+        vacantIndex = updateNegColVacancy(startingIndex, endIndex, column_arrays);
+        if(vacantIndex == -1){
+            break;
+        }
+        if(column_arrays[index] != 0 && index > vacantIndex){
+            column_arrays[vacantIndex] = column_arrays[index];
+            column_arrays[index] = 0;
+        }
+    }
+    updateColNumbers(column_arrays, index_column);
+}
+
+function updateNegRow(startingIndex){ //This functions handles the left dragging direction
+    var endIndex = startingIndex + 4; 
+    var vacantIndex; //this suggests the first initial vacancy of an element
+    for(var index = startingIndex; index < endIndex; index++){
+        vacantIndex = updateNegVacancy(startingIndex, endIndex)
+        if(vacantIndex == -1){
+            break;
+        }   
+        //find the closed container in the row
+        if(grid_values[index] != 0 && index > vacantIndex){ //YESSSSSSSSSSSS GUMAGANA NA
+            grid_values[vacantIndex] = grid_values[index];
+            grid_values[index] = 0;    
+            console.log("SOMETHING DEBUG")
+        }
+    }
+}
+
+function updatePosRow(startingIndex){ //This function is an opposite implementation of updateNegRow that handles the right drag direction
+    var endIndex = startingIndex - 4;
+    var vacantIndex;
+    for(var index = startingIndex; index > endIndex; index--){
+        vacantIndex = updatePosVacancy(startingIndex, endIndex)
+        if(vacantIndex == -1){
+            break;
+        }
+        if(grid_values[index] != 0 && index < vacantIndex){
+            grid_values[vacantIndex] = grid_values[index];
+            grid_values[index] = 0;
+            console.log("SOMETHING DEBUG");
+        }
+    }
+}
+
+function updateNegVacancy(startingIndex, endIndex){ //Function that checks vacancy in a left to right direction (left being the highest priority)
+    var vacantIndex;
+    for(var index = startingIndex; index < endIndex; index++){
+        if(grid_values[index] == 0){
+            vacantIndex = index;
+            console.log("update vacancy index: " + vacantIndex);
+            return vacantIndex;
+        }
+    }
+    console.log("No vacant")
+    return -1;
+}
+
+function updatePosVacancy(startingIndex, endIndex){ //Opposite implementation of updateNegVacancy (right being the highest priority)
+    var vacantIndex;
+    for(var index = startingIndex; index > endIndex; index--){
+        if(grid_values[index] == 0){
+            vacantIndex = index;
+            console.log("update pos vacancy index: " + vacantIndex);
+            return vacantIndex;
+        }
+    }
+    console.log("No pos vacant");
+    return -1;
+}
+
+function updatePosColVacancy(startingIndex, endIndex, column_arrays){
+    var vacantIndex;
+    for(var index = startingIndex; index > endIndex; index--){
+        if(column_arrays[index] == 0){
+            vacantIndex = index;
+            return vacantIndex;
+        }
+    }
+    return -1;
+}
+
+function updateNegColVacancy(startingIndex, endIndex, column_arrays){
+    var vacantIndex;
+    for(var index = startingIndex; index < endIndex; index++){
+        if(column_arrays[index] == 0){
+            vacantIndex = index;
+            return vacantIndex;
+        }
+    }
+    return -1;
+}
+
+function combineNumbers(){
+
+}
+function ifEqual(){ //function for checking if numbers will combine if equal during collision
+
+}
 document.addEventListener('DOMContentLoaded', function (){ //when website starts its first load, then perform starting set-up
     createGrid();
-    updateGrid(randomizeNumbers(), 2); //sets number for starting grid
-    updateGrid(randomizeNumbers(), 2); //sets 2nd number for starting grid
+    addNum(randomizeNumbers(), 2); //sets number for starting grid
+    addNum(randomizeNumbers(), 2); //sets 2nd number for starting grid
+    updateGrid();
     document.getElementById("debug-purposes").innerHTML = randomizeNumbers();
-    document.getElementById("playview-container").onclick = onClickContainer;
+    // document.getElementById("playview-container").onclick = onClickContainer;
     handleDragMovement();
-}); //keep note that I passed the function reference. using createGrid() will return an undefined since you already executed it before the DOM even loaded
+}); //keep note that I passed the function reference. using createGrid() will return an undefined since you already executed it before the DOM even loaded (fixed, not used)
