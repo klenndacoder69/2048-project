@@ -128,25 +128,38 @@ function handleDragMovement(){
 
                 }
             }
+            //09-03-2024 (we must handle the spawning of numbers when there are no avaiable moves)
+            onClickContainer(); 
         }
     })
 
 }   
 
+function checkAvailableMoves(){ //if no available moves, do not perform adding of numbers
+    //we can check the availability of moves by iterating over the grid and finding out whether the vacancy index is greater than the index of the available numbers
+    for(var a = 0; a < numGrid; a+=4){
+        for(var b = a; b < b + 4; b++){
+
+        }
+    }
+}
 function handleNumMovement(direction){ //function for handling number movement in any primary direction
     var column_arrays;
     var index_column;
-    if(direction == -1){ //neg x
+    if(direction === -1){ //neg x
         for(var a = 0; a < numGrid; a += 4){
             updateNegRow(a);
+            combineNumbers(direction, a);
+            
         }
     }
-    if(direction == 1){ //pos x
+    if(direction === 1){ //pos x
         for(var a = 3; a < numGrid; a += 4){
            updatePosRow(a);
+           combineNumbers(direction, a);
         }
     }
-    if(direction == -2){ //neg y
+    if(direction === -2){ //neg y
         for(var a = 0; a < numGrid/4; a++){
             column_arrays = [];
             index_column = [];
@@ -156,9 +169,10 @@ function handleNumMovement(direction){ //function for handling number movement i
             }
             // updatePosRow(column_arrays.length - 1); //this means an index of 3 as the starting index
             updateNegCol(column_arrays, index_column);
+            combineNumbers(direction,a);
         }
     }
-    if(direction == 2){
+    if(direction === 2){ //pos y
         for(var a = 0; a < numGrid/4; a++){
             column_arrays = [];
             index_column = [];
@@ -167,15 +181,158 @@ function handleNumMovement(direction){ //function for handling number movement i
                 column_arrays.push(grid_values[b]);
             }
             updatePosCol(column_arrays, index_column);
+            combineNumbers(direction,a);
+
         }
     }
-    onClickContainer();
 }
 
-function checkOpen(){ //numbers will only combine if equal, if not equal, then collide only
-    //check if it is open, if not check the next
+//FUNCTIONS NECESSARY FOR COMBINING NUMBERS:
 
+function combineNumbers(direction, startingIndex){ //function to call after moving the numbers
+    console.log("NIGGAAAAAAAAAAAAAAAAAA")
+    var start;
+    var end;
+    //conditions to combine:
+    //they are equal && (they are adjacent to each other || there are vacant spaces between them)
+    if(direction === -1){
+        end = startingIndex; 
+        start = startingIndex + 3; //3 kase 4 - 1, we must not use the next row
+        for(var a = start; a > end; a--){
+            if(grid_values[a-1] === grid_values[a]){
+                grid_values[a-1] *= 2;
+                grid_values[a] = 0;
+            }
+        }  
+    }
+    if(direction === 1){
+        end = startingIndex;
+        start = startingIndex - 3;
+        for(var a = start; a < end; a++){
+            if(grid_values[a+1] === grid_values[a]){
+                grid_values[a+1] *= 2;
+                grid_values[a] = 0;
+            }
+        }
+    }
+    if(direction === -2){
+        start = startingIndex;
+        end = startingIndex + 12;
+        for(var a = start; a < end; a+=4){
+            console.log(a)
+            if(grid_values[a] === grid_values[a+4]){
+                grid_values[a+4] *= 2;
+                grid_values[a] = 0;
+            }
+        }
+    }
+    if(direction === 2){
+        end = startingIndex;
+        start = startingIndex + 12;
+        for(var a = start; a > end; a -=4){
+            if(grid_values[a] === grid_values[a-4]){
+                grid_values[a-4] *= 2;
+                grid_values[a] = 0;
+            }
+        }
+    }
 }
+
+// function checkAdjacency(index, index2){
+//     if(grid_values[index2] == grid_values[index+1] || //right
+//         grid_values[index2] == grid_values[index-1] || //left
+//         grid_values[index2] == grid_values[index+4] || //bottom
+//         grid_values[index2] == grid_values[index-4] //top
+//         ){
+//             return true;
+//         } 
+//     return false;
+// }
+//END OF COMBINE FUNCTIONS------------------
+//FUNCTIONS FOR UPDATING ROWS (LEFT AND RIGHT DRAG):
+function updateNegRow(startingIndex){ //This functions handles the left dragging direction
+    var endIndex = startingIndex + 4; 
+    var vacantIndex; //this suggests the first initial vacancy of an element
+    for(var index = startingIndex; index < endIndex; index++){
+        vacantIndex = updateNegVacancy(startingIndex, endIndex)
+        if(vacantIndex == -1){
+            break;
+        }   
+        //find the closed container in the row
+        if(grid_values[index] != 0 && index > vacantIndex){ //YESSSSSSSSSSSS GUMAGANA NA
+            grid_values[vacantIndex] = grid_values[index];
+            grid_values[index] = 0;    
+            // console.log("SOMETHING DEBUG")
+        }
+    }
+}
+
+function updatePosRow(startingIndex){ //This function is an opposite implementation of updateNegRow that handles the right drag direction
+    var endIndex = startingIndex - 4;
+    var vacantIndex;
+    for(var index = startingIndex; index > endIndex; index--){
+        vacantIndex = updatePosVacancy(startingIndex, endIndex)
+        if(vacantIndex == -1){
+            break;
+        }
+        if(grid_values[index] != 0 && index < vacantIndex){
+            grid_values[vacantIndex] = grid_values[index];
+            grid_values[index] = 0;
+            // console.log("SOMETHING DEBUG");
+        }
+    }
+}
+
+function updateNegVacancy(startingIndex, endIndex){ //Function that checks vacancy in a left to right direction (left being the highest priority)
+    var vacantIndex;
+    for(var index = startingIndex; index < endIndex; index++){
+        if(grid_values[index] == 0){
+            vacantIndex = index;
+            // console.log("update vacancy index: " + vacantIndex);
+            return vacantIndex;
+        }
+    }
+    console.log("No vacant")
+    return -1;
+}
+
+function updatePosVacancy(startingIndex, endIndex){ //Opposite implementation of updateNegVacancy (right being the highest priority)
+    var vacantIndex;
+    for(var index = startingIndex; index > endIndex; index--){
+        if(grid_values[index] == 0){
+            vacantIndex = index;
+            console.log("update pos vacancy index: " + vacantIndex);
+            return vacantIndex;
+        }
+    }
+    console.log("No pos vacant");
+    return -1;
+}
+//END OF ROW FUNCTIONS-------------------------------
+
+//FUNCTIONS NECESSARY FOR DRAGGING COLUMNS (UP AND DOWN DRAG):
+function updatePosColVacancy(startingIndex, endIndex, column_arrays){
+    var vacantIndex;
+    for(var index = startingIndex; index > endIndex; index--){
+        if(column_arrays[index] == 0){
+            vacantIndex = index;
+            return vacantIndex;
+        }
+    }
+    return -1;
+}
+
+function updateNegColVacancy(startingIndex, endIndex, column_arrays){
+    var vacantIndex;
+    for(var index = startingIndex; index < endIndex; index++){
+        if(column_arrays[index] == 0){
+            vacantIndex = index;
+            return vacantIndex;
+        }
+    }
+    return -1;
+}
+
 
 function updateColNumbers(column_arrays, index_column){
     for(var a = 0; a < column_arrays.length; a++){
@@ -217,91 +374,7 @@ function updatePosCol(column_arrays, index_column){
     }
     updateColNumbers(column_arrays, index_column);
 }
-
-function updateNegRow(startingIndex){ //This functions handles the left dragging direction
-    var endIndex = startingIndex + 4; 
-    var vacantIndex; //this suggests the first initial vacancy of an element
-    for(var index = startingIndex; index < endIndex; index++){
-        vacantIndex = updateNegVacancy(startingIndex, endIndex)
-        if(vacantIndex == -1){
-            break;
-        }   
-        //find the closed container in the row
-        if(grid_values[index] != 0 && index > vacantIndex){ //YESSSSSSSSSSSS GUMAGANA NA
-            grid_values[vacantIndex] = grid_values[index];
-            grid_values[index] = 0;    
-            console.log("SOMETHING DEBUG")
-        }
-    }
-}
-
-function updatePosRow(startingIndex){ //This function is an opposite implementation of updateNegRow that handles the right drag direction
-    var endIndex = startingIndex - 4;
-    var vacantIndex;
-    for(var index = startingIndex; index > endIndex; index--){
-        vacantIndex = updatePosVacancy(startingIndex, endIndex)
-        if(vacantIndex == -1){
-            break;
-        }
-        if(grid_values[index] != 0 && index < vacantIndex){
-            grid_values[vacantIndex] = grid_values[index];
-            grid_values[index] = 0;
-            console.log("SOMETHING DEBUG");
-        }
-    }
-}
-
-function updateNegVacancy(startingIndex, endIndex){ //Function that checks vacancy in a left to right direction (left being the highest priority)
-    var vacantIndex;
-    for(var index = startingIndex; index < endIndex; index++){
-        if(grid_values[index] == 0){
-            vacantIndex = index;
-            console.log("update vacancy index: " + vacantIndex);
-            return vacantIndex;
-        }
-    }
-    console.log("No vacant")
-    return -1;
-}
-
-function updatePosVacancy(startingIndex, endIndex){ //Opposite implementation of updateNegVacancy (right being the highest priority)
-    var vacantIndex;
-    for(var index = startingIndex; index > endIndex; index--){
-        if(grid_values[index] == 0){
-            vacantIndex = index;
-            console.log("update pos vacancy index: " + vacantIndex);
-            return vacantIndex;
-        }
-    }
-    console.log("No pos vacant");
-    return -1;
-}
-
-function updatePosColVacancy(startingIndex, endIndex, column_arrays){
-    var vacantIndex;
-    for(var index = startingIndex; index > endIndex; index--){
-        if(column_arrays[index] == 0){
-            vacantIndex = index;
-            return vacantIndex;
-        }
-    }
-    return -1;
-}
-
-function updateNegColVacancy(startingIndex, endIndex, column_arrays){
-    var vacantIndex;
-    for(var index = startingIndex; index < endIndex; index++){
-        if(column_arrays[index] == 0){
-            vacantIndex = index;
-            return vacantIndex;
-        }
-    }
-    return -1;
-}
-
-function combineNumbers(){
-
-}
+//END OF COLUMN FUNCTIONS--------------------------------------
 function ifEqual(){ //function for checking if numbers will combine if equal during collision
 
 }
