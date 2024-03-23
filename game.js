@@ -51,14 +51,15 @@ function random_values(){
     var randIndex = Math.floor(Math.random() * values.length);
     return values[randIndex];
 }
-function onClickContainer(){
-    
+function onClickContainer(flag){
     var index = randomizeNumbers();
     //or you can just create a list containing all the grid elements, and just change their values there.
     //get that specific grid element
     var value = random_values();
     //insertion of '4' will be implemented later
-    addNum(index, value);
+    if(flag){ //CHECK THIS 23/03/2024
+        addNum(index, value);
+    }
     updateGrid()
     //we can keep track of the numbers by appending it to a list?
 
@@ -70,7 +71,7 @@ function handleDragMovement(){
     Clicking and dragging are two different things. Thus, we must consider a distance to
     where a mouse 'drag' is actually a dragging scenario and not a clicking scenario. 
     */ 
-     
+    var flag = false; //checks whether there are available moves 
     var negX;
     var negY;
     const dragDistance = 7; 
@@ -110,47 +111,42 @@ function handleDragMovement(){
             if(xDiff > yDiff){ //we consider the left and right drag
                 if(negX){
                     console.log("negative x drag");
-                    handleNumMovement(-1); //-1 : negative x
+                    flag = handleNumMovement(-1); //-1 : negative x
                 }
                 else{
                     console.log("positive x drag");
-                    handleNumMovement(1); // 1 : positive x
+                    flag = handleNumMovement(1); // 1 : positive x
                 }
             }
             else{ //we consider the up and down drag
                 if(negY){
                     console.log("negative y drag");
-                    handleNumMovement(-2); //-2 : negative y
+                    flag = handleNumMovement(-2); //-2 : negative y
                 }
                 else{
                     console.log("positive y drag");
-                    handleNumMovement(2); //2 : positive y
+                    flag = handleNumMovement(2); //2 : positive y
 
                 }
             }
             //09-03-2024 (we must handle the spawning of numbers when there are no avaiable moves)
-            onClickContainer(); 
+                onClickContainer(flag); 
         }
     })
 
 }   
 
-function checkAvailableMoves(){ //if no available moves, do not perform adding of numbers
-    //we can check the availability of moves by iterating over the grid and finding out whether the vacancy index is greater than the index of the available numbers
-    for(var a = 0; a < numGrid; a+=4){
-        for(var b = a; b < b + 4; b++){
 
-        }
-    }
-}
+
 function handleNumMovement(direction){ //function for handling number movement in any primary direction
     var column_arrays;
     var index_column;
+    var track_grid = [...grid_values]; //spread operator to keep track of the grid_values CURRENT INSTANCE. (using track_grid = grid_values will reference track_grid to grid_values, its values constantly always being equal to grid_values)
+    console.log(track_grid);
     if(direction === -1){ //neg x
         for(var a = 0; a < numGrid; a += 4){
             updateNegRow(a);
             combineNumbers(direction, a);
-            
         }
     }
     if(direction === 1){ //pos x
@@ -172,6 +168,7 @@ function handleNumMovement(direction){ //function for handling number movement i
             combineNumbers(direction,a);
         }
     }
+
     if(direction === 2){ //pos y
         for(var a = 0; a < numGrid/4; a++){
             column_arrays = [];
@@ -185,12 +182,23 @@ function handleNumMovement(direction){ //function for handling number movement i
 
         }
     }
+    //check whether a value is changed. if a value is changed, this implied that there were changes in the placement of numbers
+    //else there are no available moves
+    console.log(track_grid);
+    console.log(grid_values);
+    // console.log(track_grid);
+    for(var a = 0; a < grid_values.length; a++){
+        if(grid_values[a] !== track_grid[a]){
+            console.log(grid_values[a], " ", track_grid[a]);
+            return true;
+        }
+    }
+    return false;
 }
 
 //FUNCTIONS NECESSARY FOR COMBINING NUMBERS:
 
 function combineNumbers(direction, startingIndex){ //function to call after moving the numbers
-    console.log("NIGGAAAAAAAAAAAAAAAAAA")
     var start;
     var end;
     //conditions to combine:
@@ -238,17 +246,6 @@ function combineNumbers(direction, startingIndex){ //function to call after movi
     }
 }
 
-// function checkAdjacency(index, index2){
-//     if(grid_values[index2] == grid_values[index+1] || //right
-//         grid_values[index2] == grid_values[index-1] || //left
-//         grid_values[index2] == grid_values[index+4] || //bottom
-//         grid_values[index2] == grid_values[index-4] //top
-//         ){
-//             return true;
-//         } 
-//     return false;
-// }
-//END OF COMBINE FUNCTIONS------------------
 //FUNCTIONS FOR UPDATING ROWS (LEFT AND RIGHT DRAG):
 function updateNegRow(startingIndex){ //This functions handles the left dragging direction
     var endIndex = startingIndex + 4; 
