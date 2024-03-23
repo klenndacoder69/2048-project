@@ -15,7 +15,6 @@ function randomizeNumbers(){
     }
     //find index by getting the value of the specified index in the open slots
     var index = open_slots[Math.floor(Math.random() * open_slots.length)];
-    // var rand = Math.floor(Math.random() * 17);
     return index;
 }
 function createGrid(){
@@ -46,18 +45,21 @@ function updateGrid(){ //changed updateGrid based on position of grid_values
         }
     }
 }
+
+//Function for adding random values into the grid
 function random_values(){
     var values = [2,4];
     var randIndex = Math.floor(Math.random() * values.length);
     return values[randIndex];
 }
-function onClickContainer(flag){
+
+//When user drags on the screen, check the flag (available moves) and add a number if there are available moves
+function onClickContainer(flag){ 
     var index = randomizeNumbers();
     //or you can just create a list containing all the grid elements, and just change their values there.
     //get that specific grid element
     var value = random_values();
-    //insertion of '4' will be implemented later
-    if(flag){ //CHECK THIS 23/03/2024
+    if(flag){ 
         addNum(index, value);
     }
     updateGrid()
@@ -129,7 +131,6 @@ function handleDragMovement(){
 
                 }
             }
-            //09-03-2024 (we must handle the spawning of numbers when there are no avaiable moves)
                 onClickContainer(flag); 
         }
     })
@@ -163,7 +164,6 @@ function handleNumMovement(direction){ //function for handling number movement i
                 index_column.push(b); // push the indexes
                 column_arrays.push(grid_values[b]); //push the values
             }
-            // updatePosRow(column_arrays.length - 1); //this means an index of 3 as the starting index
             updateNegCol(column_arrays, index_column);
             combineNumbers(direction,a);
         }
@@ -256,10 +256,9 @@ function updateNegRow(startingIndex){ //This functions handles the left dragging
             break;
         }   
         //find the closed container in the row
-        if(grid_values[index] != 0 && index > vacantIndex){ //YESSSSSSSSSSSS GUMAGANA NA
+        if(grid_values[index] != 0 && index > vacantIndex){ 
             grid_values[vacantIndex] = grid_values[index];
             grid_values[index] = 0;    
-            // console.log("SOMETHING DEBUG")
         }
     }
 }
@@ -275,7 +274,6 @@ function updatePosRow(startingIndex){ //This function is an opposite implementat
         if(grid_values[index] != 0 && index < vacantIndex){
             grid_values[vacantIndex] = grid_values[index];
             grid_values[index] = 0;
-            // console.log("SOMETHING DEBUG");
         }
     }
 }
@@ -372,15 +370,12 @@ function updatePosCol(column_arrays, index_column){
     updateColNumbers(column_arrays, index_column);
 }
 //END OF COLUMN FUNCTIONS--------------------------------------
-function ifEqual(){ //function for checking if numbers will combine if equal during collision
 
-}
 document.addEventListener('DOMContentLoaded', function (){ //when website starts its first load, then perform starting set-up
     createGrid();
-    addNum(randomizeNumbers(), 2); //sets number for starting grid
-    addNum(randomizeNumbers(), 2); //sets 2nd number for starting grid
-    updateGrid();
-    document.getElementById("debug-purposes").innerHTML = randomizeNumbers();
-    // document.getElementById("playview-container").onclick = onClickContainer;
+    //Sets starting two numbers at the start of the game:
+    addNum(randomizeNumbers(), 2); 
+    addNum(randomizeNumbers(), 2); 
+    updateGrid(); //Shows the starting two numbers
     handleDragMovement();
 }); //keep note that I passed the function reference. using createGrid() will return an undefined since you already executed it before the DOM even loaded (fixed, not used)
