@@ -2,6 +2,7 @@
 const numGrid = 16; //number of grids
 var grid_elements = document.getElementsByClassName("playview-item"); //array that contains the elements of the grid that are changeable
 var grid_values = Array.from({length:numGrid}, () => 0);  //grid value array, sets the length to 16
+var score = 0;
 
 //end of global variables...
 function randomizeNumbers(){
@@ -182,6 +183,7 @@ function handleNumMovement(direction){ //function for handling number movement i
 
         }
     }
+    updateScore();
     //check whether a value is changed. if a value is changed, this implied that there were changes in the placement of numbers
     //else there are no available moves
     console.log(track_grid);
@@ -209,6 +211,7 @@ function combineNumbers(direction, startingIndex){ //function to call after movi
         for(var a = start; a > end; a--){
             if(grid_values[a-1] === grid_values[a]){
                 grid_values[a-1] *= 2;
+                score += grid_values[a-1];
                 grid_values[a] = 0;
             }
         }  
@@ -219,6 +222,7 @@ function combineNumbers(direction, startingIndex){ //function to call after movi
         for(var a = start; a < end; a++){
             if(grid_values[a+1] === grid_values[a]){
                 grid_values[a+1] *= 2;
+                score += grid_values[a+1];
                 grid_values[a] = 0;
             }
         }
@@ -230,6 +234,7 @@ function combineNumbers(direction, startingIndex){ //function to call after movi
             console.log(a)
             if(grid_values[a] === grid_values[a+4]){
                 grid_values[a+4] *= 2;
+                score += grid_values[a+4];
                 grid_values[a] = 0;
             }
         }
@@ -240,6 +245,7 @@ function combineNumbers(direction, startingIndex){ //function to call after movi
         for(var a = start; a > end; a -=4){
             if(grid_values[a] === grid_values[a-4]){
                 grid_values[a-4] *= 2;
+                score += grid_values[a-4];
                 grid_values[a] = 0;
             }
         }
@@ -371,6 +377,10 @@ function updatePosCol(column_arrays, index_column){
 }
 //END OF COLUMN FUNCTIONS--------------------------------------
 
+function updateScore(){
+    document.getElementById("debug-purposes").innerHTML = score;
+}
+
 document.addEventListener('DOMContentLoaded', function (){ //when website starts its first load, then perform starting set-up
     createGrid();
     //Sets starting two numbers at the start of the game:
@@ -378,4 +388,5 @@ document.addEventListener('DOMContentLoaded', function (){ //when website starts
     addNum(randomizeNumbers(), 2); 
     updateGrid(); //Shows the starting two numbers
     handleDragMovement();
+    updateScore();
 }); //keep note that I passed the function reference. using createGrid() will return an undefined since you already executed it before the DOM even loaded (fixed, not used)
