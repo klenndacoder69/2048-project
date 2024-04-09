@@ -3,7 +3,7 @@ const numGrid = 16; //number of grids
 var grid_elements = document.getElementsByClassName("playview-item"); //array that contains the elements of the grid that are changeable
 var grid_values = Array.from({length:numGrid}, () => 0);  //grid value array, sets the length to 16
 var score = 0;
-
+var moveflag = false;
 //end of global variables...
 function randomizeNumbers(){
     //random number will be picked through grid values that are equal to zero (open spaces)
@@ -132,7 +132,12 @@ function handleDragMovement(){
 
                 }
             }
-                onClickContainer(flag); 
+            onClickContainer(flag); //after dragging, check whether the user has combined and there are possible moves
+        }
+        updateScore(); //updates the score after moving
+        noPossibleMoves();
+        if(moveflag){
+            alert("Game over! There are no possible moves. Please refresh to continue playing.")
         }
     })
 
@@ -183,13 +188,12 @@ function handleNumMovement(direction){ //function for handling number movement i
 
         }
     }
-    updateScore();
     //check whether a value is changed. if a value is changed, this implied that there were changes in the placement of numbers
     //else there are no available moves
     console.log(track_grid);
     console.log(grid_values);
     // console.log(track_grid);
-    for(var a = 0; a < grid_values.length; a++){
+    for(var a = 0; a < grid_values.length; a++){ //this checks whether the current grid is an exact copy of its previous grid (track_grid). if yes, then this suggest that there are no available moves even after dragging
         if(grid_values[a] !== track_grid[a]){
             console.log(grid_values[a], " ", track_grid[a]);
             return true;
@@ -206,49 +210,57 @@ function combineNumbers(direction, startingIndex){ //function to call after movi
     //conditions to combine:
     //they are equal && (they are adjacent to each other || there are vacant spaces between them)
     if(direction === -1){
-        end = startingIndex; 
-        start = startingIndex + 3; //3 kase 4 - 1, we must not use the next row
-        for(var a = start; a > end; a--){
-            if(grid_values[a-1] === grid_values[a]){
-                grid_values[a-1] *= 2;
-                score += grid_values[a-1];
-                grid_values[a] = 0;
-            }
-        }  
-    }
-    if(direction === 1){
-        end = startingIndex;
-        start = startingIndex - 3;
+        start = startingIndex; 
+        end = startingIndex + 3; //3 kase 4 - 1, we must not use the next row
         for(var a = start; a < end; a++){
             if(grid_values[a+1] === grid_values[a]){
-                grid_values[a+1] *= 2;
-                score += grid_values[a+1];
-                grid_values[a] = 0;
+                grid_values[a+1] = 0;
+                grid_values[a] *= 2;
+                score += grid_values[a];
             }
-        }
+        }  
+        updateNegRow(startingIndex); //re-render. this ensures that when you move the drag to any direction, the drag continues after the combining of numbers
     }
-    if(direction === -2){
+    //goal: start from the rightmost and iterate to the leftmost. prioritizing the numbers that are closest to the grid
+    if(direction === 1){
         start = startingIndex;
-        end = startingIndex + 12;
-        for(var a = start; a < end; a+=4){
-            console.log(a)
-            if(grid_values[a] === grid_values[a+4]){
-                grid_values[a+4] *= 2;
-                score += grid_values[a+4];
-                grid_values[a] = 0;
+        end = startingIndex - 3;
+        for(var a = start; a > end; a--){
+            if(grid_values[a-1] === grid_values[a]){
+                grid_values[a-1] = 0;
+                grid_values[a] *= 2;
+                score += grid_values[a];
             }
         }
+        updatePosRow(startingIndex);
     }
-    if(direction === 2){
+    //goal: start from the bottom and go to the upmost number:
+
+    if(direction === -2){
         end = startingIndex;
         start = startingIndex + 12;
-        for(var a = start; a > end; a -=4){
+        for(var a = start; a > end; a-=4){
+            console.log(a)
             if(grid_values[a] === grid_values[a-4]){
-                grid_values[a-4] *= 2;
-                score += grid_values[a-4];
-                grid_values[a] = 0;
+                grid_values[a-4] = 0;
+                grid_values[a] *= 2;
+                score += grid_values[a];
+
             }
         }
+        updateNegCol(startingIndex);
+    }
+    if(direction === 2){
+        start = startingIndex;
+        end = startingIndex + 12;
+        for(var a = start; a < end; a +=4){
+            if(grid_values[a] === grid_values[a+4]){
+                grid_values[a+4] = 0;
+                grid_values[a] *= 2;
+                score += grid_values[a];
+            }
+        }
+        updatePosCol(startingIndex); 
     }
 }
 
@@ -381,12 +393,35 @@ function updateScore(){
     document.getElementById("debug-purposes").innerHTML = score;
 }
 
+
+
+//To check whether the game is over, we can simulate another game grid that moves in all four directions and checks whether there are possible moves:
+function noPossibleMoves(){
+    var placeholder = [...grid_values]; //we can create a placeholder grid that will be used to revert the changes we made earlier.
+    const directions = [-1,1,-2,2];
+    for(let direction of directions){
+        handleNumMovement(direction);
+    }
+    for(var a = 0; a < grid_values.length; a++){ //this checks whether the current grid is an exact copy of its previous grid (track_grid). if yes, then this suggest that there are no available moves even after dragging
+        if(grid_values[a] !== placeholder[a]){
+            grid_values = [...placeholder]; //there are possible moves. so we revert the changes made.
+            moveflag = false;
+            return;
+        }
+    }
+    console.log("check");
+    console.log(placeholder);
+    console.log(grid_values);
+    moveflag = true;
+    return;
+}
+
 document.addEventListener('DOMContentLoaded', function (){ //when website starts its first load, then perform starting set-up
     createGrid();
     //Sets starting two numbers at the start of the game:
     addNum(randomizeNumbers(), 2); 
     addNum(randomizeNumbers(), 2); 
     updateGrid(); //Shows the starting two numbers
-    handleDragMovement();
-    updateScore();
 }); //keep note that I passed the function reference. using createGrid() will return an undefined since you already executed it before the DOM even loaded (fixed, not used)
+
+handleDragMovement();
