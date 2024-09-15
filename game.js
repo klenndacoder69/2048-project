@@ -62,11 +62,14 @@ function onClickContainer(flag){
     var value = random_values();
     if(flag){ 
         addNum(index, value);
+        updateScore(); //updates the score after moving
+        
     }
     updateGrid()
     //we can keep track of the numbers by appending it to a list?
 
 }
+
 
 function handleDragMovement(){
     /*
@@ -134,7 +137,6 @@ function handleDragMovement(){
             }
             onClickContainer(flag); //after dragging, check whether the user has combined and there are possible moves
         }
-        updateScore(); //updates the score after moving
         noPossibleMoves();
         if(moveflag){
             alert("Game over! There are no possible moves. Please refresh to continue playing.")
@@ -390,7 +392,7 @@ function updatePosCol(column_arrays, index_column){
 //END OF COLUMN FUNCTIONS--------------------------------------
 
 function updateScore(){
-    document.getElementById("debug-purposes").innerHTML = score;
+    document.getElementById("score").innerHTML = score;
 }
 
 

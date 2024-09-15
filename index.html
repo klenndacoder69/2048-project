@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<meta name = "viewport" content="width=device-width, initial-scale=1.0">
-		<title>2048</title>
-		<link rel="stylesheet" href="design.css" type="text/css">
-		
-	</head>
-	<body>
-		<div id="header-title">
-			<h1>2048</h1>	
-		</div>
-		<div id="playview-container">
-			<!--4x4 container-->
-		</div>
-		<p id = "debug-purposes">DEBUG</p>
-		<script type="text/javascript" src="game.js">
-		</script>
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048</title>
+    <link rel="stylesheet" href="design.css" type="text/css">
+</head>
+<body>
+    <div id="header-container">
+        <div id="header-title">
+            <h1>2048</h1>
+        </div>
+        <div id="vertical-container">
+            <div id="score-board"></div>
+                <p>Score: <span id="score">0</span></p>
+            </div>
+            <div id="playview-container"></div>
+        </div>
+    </div>
+    <script type="text/javascript" src="game.js"></script>
+</body>
 </html>
-

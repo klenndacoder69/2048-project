@@ -1,38 +1,92 @@
-#header-title{
-	background-color: rgba(179, 158, 123, 0.87);
-	font-style: italic;
-	text-align: center;
-	justify-content: center;
-	font-family:Verdana, Geneva, Tahoma, sans-serif;
-	padding: 5px;	
+body {
+    background-color: #f4f4f4; 
+    font-family: 'Arial', sans-serif; 
+    height: 100vh;
 	display: flex;
-}
-
-body{
-	background: peachpuff;
-}
-
-#playview-container{
-	display: grid;
-	grid-template-columns: auto auto auto auto; /*the number of additions signifies the grid*/
-	padding: 40px;
-	text-align: center;
+	align-items: center;
 	justify-content: center;
-	/*prevents user selection*/
-	-webkit-user-select: none;
-	-ms-user-select:none;
-	user-select:none;
 }
 
-.playview-item{
-	background-color: rgba(255,255,255,0.8);
-	border: 1px solid rgba(0,0,0,0.8);
-	padding: 60px; /*specifies the size of each cell*/
-	font-size: 30px;
-	text-align: center;
-	justify-content: center;
-	width:50px;
-	height: 50px;
-	box-sizing: border-box;
+#header-title {
+    background-color: #f9f6f2; 
+    color: #776e65; 
+    font-size: 2.5em;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
 
+#playview-container {
+    display: grid;
+    grid-template-columns: repeat(4, 80px); 
+    grid-gap: 10px; 
+    padding: 20px;
+    background-color: #bbada0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	/* uhh, to not select the numbers lmao*/
+    -webkit-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+
+.playview-item {
+    background-color: #eee4da; 
+    border-radius: 5px;
+    font-size: 2em;
+    color: #776e65; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    box-sizing: border-box;
+}
+
+
+.playview-item[data-value="2"] {
+    background-color: #eee4da;
+    color: #776e65;
+}
+
+.playview-item[data-value="4"] {
+    background-color: #ede0c8;
+    color: #776e65;
+}
+
+.playview-item[data-value="8"] {
+    background-color: #f2b179;
+    color: #f9f6f2;
+}
+
+.playview-item[data-value="16"] {
+    background-color: #f59563;
+    color: #f9f6f2;
+}
+
+#vertical-container{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+#score-board {
+    font-size: 1.2em;
+    text-align: center;
+    margin-top: 20px;
+    color: #776e65;
+}
+
+#header-container{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
